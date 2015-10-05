@@ -7,7 +7,8 @@ import com.cassandra.phantom.modeling.entity.Songs
 import com.cassandra.phantom.modeling.model.{GenericSongsModel, SongsByArtistModel, SongsModel}
 import com.websudos.phantom.dsl._
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 /**
  * Created by Thiago Pereira on 8/4/15.
@@ -38,8 +39,13 @@ trait SongsService extends CassandraConnector {
     }
 
     def delete(songs: Songs): Future[ResultSet] = {
-      songsModel.model.delete.where(_ => songsModel.model.songId eqs songs.songId).future()
+      songsModel.model.delete.where(_ => songsModel.model.songId eqs songs.songId)
       songsByArtistModel.model.delete.where(_ => songsByArtistModel.model.artist eqs songs.artist).and(_ => songsByArtistModel.model.songId eqs songs.songId).future()
+    }
+
+    def createTables = {
+      Await.ready(songsModel.model.create.ifNotExists().future(), 3.seconds)
+      Await.ready(songsByArtistModel.model.create.ifNotExists().future(), 3.seconds)
     }
 
     private def saveGeneric(genericSongsModel: GenericSongsModel, songs: Songs): Future[ResultSet] = {
