@@ -6,11 +6,25 @@ import com.cassandra.phantom.modeling.entity.Songs
 import com.cassandra.phantom.modeling.service.SongsService
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
+import org.scalatest.BeforeAndAfterAll
+
+import scala.concurrent.Await
 
 /**
  * Created by Thiago Pereira on 8/4/15.
  */
-class SongsTest extends CassandraSpec with SongsService {
+class SongsTest extends CassandraSpec
+with BeforeAndAfterAll
+with SongsService {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    service.createTables
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+  }
 
   def fixture(id: UUID) = new {
     val songs = Songs(id, "Prison Song", "Toxicity", "System of a Down")
@@ -41,10 +55,14 @@ class SongsTest extends CassandraSpec with SongsService {
   }
 
   it should "find songs by artist" in {
+    val uuid1 = UUIDs.timeBased()
+    val uuid2 = UUIDs.timeBased()
+    val uuid3 = UUIDs.timeBased()
+
     val songsList = List(
-      fixture(UUIDs.timeBased()).songs,
-      fixture(UUIDs.timeBased()).songs.copy(title = "Aerials"),
-      fixture(UUIDs.timeBased()).songs.copy(title = "Chop Suey")
+      fixture(uuid1).songs,
+      fixture(uuid2).songs.copy(title = "Aerials"),
+      fixture(uuid3).songs.copy(title = "Chop Suey")
     )
 
     val future = service.saveList(songsList)
@@ -53,6 +71,9 @@ class SongsTest extends CassandraSpec with SongsService {
       val songsByArtist = service.getSongsByArtist("System of a Down")
       whenReady(songsByArtist) { searchResult =>
         insertResult.size shouldEqual searchResult.size
+        service.delete(fixture(uuid1).songs)
+        service.delete(fixture(uuid2).songs)
+        service.delete(fixture(uuid3).songs)
       }
     }
   }
