@@ -11,9 +11,7 @@ import org.scalatest.BeforeAndAfterAll
 /**
  * Created by Thiago Pereira on 8/4/15.
  */
-class SongsTest extends CassandraSpec
-with BeforeAndAfterAll
-with SongsService {
+class SongsTest extends CassandraSpec with BeforeAndAfterAll with SongsService {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -94,6 +92,26 @@ with SongsService {
           }
         }
       }
+    }
+  }
+
+  it should "do batch update" in {
+    val uuid1 = UUIDs.timeBased()
+    val uuid2 = UUIDs.timeBased()
+    val uuid3 = UUIDs.timeBased()
+
+    val songsList = List(
+      fixture(uuid1).songs,
+      fixture(uuid2).songs.copy(title = "Aerials"),
+      fixture(uuid3).songs.copy(title = "Chop Suey")
+    )
+
+    val future = service.batchUpdate(songsList)
+
+    whenReady(future) { _ =>
+      service.delete(fixture(uuid1).songs)
+      service.delete(fixture(uuid2).songs)
+      service.delete(fixture(uuid3).songs)
     }
   }
 }

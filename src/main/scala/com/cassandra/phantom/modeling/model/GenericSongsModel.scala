@@ -18,7 +18,7 @@ trait GenericSongsModel {
 
   def model: InnerGeneric
 
-  private[model] trait InnerGeneric extends CassandraTable[InnerGeneric, Songs] {
+  trait InnerGeneric extends CassandraTable[InnerGeneric, Songs] {
     
     def songId: TimeUUIDColumn[InnerGeneric, Songs]
     def artist: StringColumn[InnerGeneric, Songs]
