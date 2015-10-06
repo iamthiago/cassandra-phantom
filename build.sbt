@@ -2,7 +2,7 @@ name := "cassandra-phantom"
 
 version := "1.0"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
