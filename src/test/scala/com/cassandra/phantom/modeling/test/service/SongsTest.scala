@@ -8,8 +8,6 @@ import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
 import org.scalatest.BeforeAndAfterAll
 
-import scala.concurrent.Await
-
 /**
  * Created by Thiago Pereira on 8/4/15.
  */

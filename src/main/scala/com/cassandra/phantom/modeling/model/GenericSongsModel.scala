@@ -11,6 +11,8 @@ import com.websudos.phantom.keys.{ClusteringOrder, PartitionKey}
 
 /**
  * Created by Thiago Pereira on 8/4/15.
+ *
+ * GenericSongsModel define the common fields in your table
  */
 trait GenericSongsModel {
 
@@ -28,6 +30,10 @@ trait GenericSongsModel {
   }
 }
 
+/**
+ * Following the query-design approach we have two tables,
+ * The SongsModel("songs") and the SongsByArtistModel("songs_by_artist")
+ */
 class SongsModel extends GenericSongsModel {
   object model extends InnerGeneric {
 
