@@ -21,12 +21,13 @@ resolvers ++= Seq(
 
 libraryDependencies ++= {
 
-  val phantomV = "1.12.2"
+  val phantomV = "1.16.0"
 
   Seq(
     "com.websudos"        %%  "phantom-dsl"               % phantomV,
     "com.websudos"        %%  "phantom-testkit"           % phantomV,
     "com.websudos"        %%  "phantom-connectors"        % phantomV,
-    "org.scalatest"       %%  "scalatest"                 % "2.2.4"     % "test"
+    "org.scalatest"       %%  "scalatest"                 % "2.2.4"     % "test",
+    "com.typesafe"        %   "config"                    % "1.3.0"
   )
 }

@@ -5,9 +5,8 @@ import java.util.UUID
 import com.cassandra.phantom.modeling.connector.CassandraConnector
 import com.cassandra.phantom.modeling.entity.Songs
 import com.cassandra.phantom.modeling.model.{GenericSongsModel, SongsByArtistModel, SongsModel}
-import com.websudos.phantom.builder.Unspecified
-import com.websudos.phantom.builder.query.InsertQuery
 import com.websudos.phantom.dsl._
+import com.cassandra.phantom.modeling.util.CassandraUtils._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -26,6 +25,16 @@ trait SongsService extends CassandraConnector {
      */
     val songsModel = new SongsModel
     val songsByArtistModel = new SongsByArtistModel
+
+    /**
+     * Create the tables if not exists
+     *
+     * @return
+     */
+    def createTables = {
+      Await.ready(songsModel.model.create.ifNotExists().future(), 5.seconds)
+      Await.ready(songsByArtistModel.model.create.ifNotExists().future(), 5.seconds)
+    }
 
     /**
      * Find in the songs table by song_id
@@ -54,36 +63,8 @@ trait SongsService extends CassandraConnector {
      * @return
      */
     def saveOrUpdate(songs: Songs): Future[ResultSet] = {
-      saveGeneric(songsModel, songs).future()
-      saveGeneric(songsByArtistModel, songs).future()
-    }
-
-    /**
-     * Iterate over a list of songs and insert it, better for performance than batchUpdate
-     *
-     * @param list
-     * @return
-     */
-    def saveList(list: List[Songs]): Future[List[Songs]] = {
-      list.foreach(saveOrUpdate)
-      Future(list)
-    }
-
-    /**
-     * Batches can be unlogged, logged and count.
-     *
-     * More on: [https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e]
-     *
-     * @param list
-     * @return
-     */
-    def batchUpdate(list: List[Songs]): Future[ResultSet] = {
-      val batch = for(song <- list) yield (saveGeneric(songsModel, song), saveGeneric(songsByArtistModel, song))
-
-      val (l1, l2) = batch.unzip
-
-      Batch.unlogged.add(l1.toIterator).future()
-      Batch.unlogged.add(l2.toIterator).future()
+      saveGeneric(songsModel, songs)
+      saveGeneric(songsByArtistModel, songs)
     }
 
     /**
@@ -93,18 +74,20 @@ trait SongsService extends CassandraConnector {
      * @return
      */
     def delete(songs: Songs): Future[ResultSet] = {
-      songsModel.model.delete.where(_ => songsModel.model.songId eqs songs.songId)
-      songsByArtistModel.model.delete.where(_ => songsByArtistModel.model.artist eqs songs.artist).and(_ => songsByArtistModel.model.songId eqs songs.songId).future()
-    }
+      songsModel
+        .model
+        .delete
+        .where(_ => songsModel.model.songId eqs songs.songId)
+        .statement()
+        .runWith(ConsistencyLevel.QUORUM)
 
-    /**
-     * Create the tables if not exists
-     *
-     * @return
-     */
-    def createTables = {
-      Await.ready(songsModel.model.create.ifNotExists().future(), 3.seconds)
-      Await.ready(songsByArtistModel.model.create.ifNotExists().future(), 3.seconds)
+      songsByArtistModel
+        .model
+        .delete
+        .where(_ => songsByArtistModel.model.artist eqs songs.artist)
+        .and(_ => songsByArtistModel.model.songId eqs songs.songId)
+        .statement()
+        .runWith(ConsistencyLevel.QUORUM)
     }
 
     /**
@@ -114,12 +97,14 @@ trait SongsService extends CassandraConnector {
      * @param songs
      * @return
      */
-    private def saveGeneric(genericSongsModel: GenericSongsModel, songs: Songs): InsertQuery[genericSongsModel.InnerGeneric, Songs, Unspecified] = {
+    private def saveGeneric(genericSongsModel: GenericSongsModel, songs: Songs): Future[ResultSet] = {
       genericSongsModel.model.insert
         .value(_.songId, songs.songId)
         .value(_.title, songs.title)
         .value(_.album, songs.album)
         .value(_.artist, songs.artist)
+        .statement()
+        .runWith(ConsistencyLevel.QUORUM)
     }
   }
 }

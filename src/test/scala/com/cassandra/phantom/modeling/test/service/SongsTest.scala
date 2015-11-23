@@ -8,18 +8,15 @@ import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
 import org.scalatest.BeforeAndAfterAll
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
  * Created by Thiago Pereira on 8/4/15.
  */
 class SongsTest extends CassandraSpec with BeforeAndAfterAll with SongsService {
 
   override def beforeAll(): Unit = {
-    super.beforeAll()
     service.createTables
-  }
-
-  override def afterAll(): Unit = {
-    super.afterAll()
   }
 
   def fixture(id: UUID) = new {
@@ -55,18 +52,22 @@ class SongsTest extends CassandraSpec with BeforeAndAfterAll with SongsService {
     val uuid2 = UUIDs.timeBased()
     val uuid3 = UUIDs.timeBased()
 
-    val songsList = List(
-      fixture(uuid1).songs,
-      fixture(uuid2).songs.copy(title = "Aerials"),
-      fixture(uuid3).songs.copy(title = "Chop Suey")
-    )
+    val future = for {
+      f1 <- service.saveOrUpdate(fixture(uuid1).songs)
+      f2 <- service.saveOrUpdate(fixture(uuid2).songs.copy(title = "Aerials"))
+      f3 <- service.saveOrUpdate(fixture(uuid3).songs.copy(title = "Chop Suey"))
+    } yield (f1, f2, f3)
 
-    val future = service.saveList(songsList)
-
-    whenReady(future) { insertResult =>
+    whenReady(future) { insert =>
       val songsByArtist = service.getSongsByArtist("System of a Down")
       whenReady(songsByArtist) { searchResult =>
-        insertResult.size shouldEqual searchResult.size
+        searchResult shouldBe a [List[_]]
+        searchResult should have length 3
+
+        forAll(searchResult) { song =>
+          song.artist shouldBe "System of a Down"
+        }
+
         service.delete(fixture(uuid1).songs)
         service.delete(fixture(uuid2).songs)
         service.delete(fixture(uuid3).songs)
@@ -92,26 +93,6 @@ class SongsTest extends CassandraSpec with BeforeAndAfterAll with SongsService {
           }
         }
       }
-    }
-  }
-
-  it should "do batch update" in {
-    val uuid1 = UUIDs.timeBased()
-    val uuid2 = UUIDs.timeBased()
-    val uuid3 = UUIDs.timeBased()
-
-    val songsList = List(
-      fixture(uuid1).songs,
-      fixture(uuid2).songs.copy(title = "Aerials"),
-      fixture(uuid3).songs.copy(title = "Chop Suey")
-    )
-
-    val future = service.batchUpdate(songsList)
-
-    whenReady(future) { _ =>
-      service.delete(fixture(uuid1).songs)
-      service.delete(fixture(uuid2).songs)
-      service.delete(fixture(uuid3).songs)
     }
   }
 }
