@@ -94,3 +94,11 @@ This project explore the scala generics to make our life easier and do not dupli
 - [http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html](http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html)
 - [https://github.com/websudos/phantom](https://github.com/websudos/phantom)
 - [https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e](https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e)
+
+## Features
+
+### Apart data modeling, you will also find:
+
+- Connect to a secure(user/password) Cassandra Cluster
+- Set Consistency Level for any kind of statement
+- Handle inserts/deletes for duplicate tables
