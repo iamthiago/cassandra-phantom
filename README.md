@@ -17,6 +17,10 @@ Now let's check our query requirements before create the tables.
 So far we know cassandra uses the query-driven approach and we also know our requirements, let's create our tables.
 
 ```sql
+CREATE KEYSPACE test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+```
+
+```sql
 CREATE TABLE test.songs (
     song_id timeuuid PRIMARY KEY,
     album text,
