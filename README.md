@@ -89,7 +89,15 @@ Looking at the documentation, it shows simple examples on how to get your cassan
 
 This project explore the scala generics to make our life easier and do not duplicate code when creating the same table with different partitions key.
 
-### Resources
+## Features
+
+#### Apart of data modeling, you will also find:
+
+- Connect to a secure(user/password) Cassandra Cluster
+- Set Consistency Level for any kind of statement
+- Handle inserts/deletes for duplicate tables
+
+## Resources
 
 - [http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html](http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html)
 - [https://github.com/websudos/phantom](https://github.com/websudos/phantom)
