@@ -42,7 +42,7 @@ object CassandraUtils {
     }
 
     /**
-     * Execute a statement from a session with a specific consistency level to get a [[List[Row]]
+     * Execute a statement from a session with a specific consistency level to get a List of [[Row]]
      *
      * @param consistencyLevel
      * @param session

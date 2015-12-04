@@ -38,7 +38,7 @@ trait SongsService extends CassandraConnector {
     }
 
     /**
-     * Find in the songs table by song_id
+     * Find songs by Id
      *
      * @param id
      * @return
@@ -55,7 +55,7 @@ trait SongsService extends CassandraConnector {
     }
 
     /**
-     * Find in the songs_by_artist by artist
+     * Find songs by Artist
      *
      * @param artist
      * @return
