@@ -12,17 +12,27 @@ import scala.collection.JavaConversions._
 /**
  * Created by Thiago Pereira on 6/9/15.
  *
- * Cassandra Connector extends the Simple Connector from phantom-dsl,
+ * Cassandra Connector extends the [[SessionProvider]] from phantom-dsl,
  * establishing a connection to a secure cluster with username and password
  */
 trait CassandraConnector extends SessionProvider {
 
   val config = ConfigFactory.load()
 
+  implicit val space: KeySpace = Connector.keyspace
+
+  val cluster = Connector.cluster
+
+  override implicit lazy val session: Session = Connector.session
+}
+
+object Connector {
+  val config = ConfigFactory.load()
+
   val hosts = config.getStringList("cassandra.host")
   val inets = hosts.map(InetAddress.getByName)
 
-  implicit val space: KeySpace = KeySpace(config.getString("cassandra.keyspace"))
+  val keyspace: KeySpace = KeySpace(config.getString("cassandra.keyspace"))
 
   val cluster =
     Cluster.builder()
@@ -30,5 +40,5 @@ trait CassandraConnector extends SessionProvider {
       .withCredentials(config.getString("cassandra.username"), config.getString("cassandra.password"))
       .build()
 
-  override implicit lazy val session: Session = cluster.connect(space.name)
+  val session: Session = cluster.connect(keyspace.name)
 }
