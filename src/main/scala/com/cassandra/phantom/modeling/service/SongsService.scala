@@ -10,6 +10,7 @@ import com.cassandra.phantom.modeling.util.CassandraUtils._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 /**
  * Created by Thiago Pereira on 8/4/15.
@@ -43,7 +44,14 @@ trait SongsService extends CassandraConnector {
      * @return
      */
     def getBySongsId(id: UUID): Future[Option[Songs]] = {
-      songsModel.model.select.where(_ => songsModel.model.songId eqs id).one()
+      val r = songsModel
+        .model
+        .select
+        .where(_ => songsModel.model.songId eqs id)
+        .statement()
+        .getOneWith(ConsistencyLevel.QUORUM)
+
+      Future(Try(songsModel.model.fromRow(r)).toOption)
     }
 
     /**
@@ -53,7 +61,14 @@ trait SongsService extends CassandraConnector {
      * @return
      */
     def getSongsByArtist(artist: String): Future[List[Songs]] = {
-      songsByArtistModel.model.select.where(_ => songsByArtistModel.model.artist eqs artist).fetch()
+      val rows = songsByArtistModel
+        .model
+        .select
+        .where(_ => songsByArtistModel.model.artist eqs artist)
+        .statement()
+        .getListWith(ConsistencyLevel.QUORUM)
+
+      Future(rows.map(r => songsByArtistModel.model.fromRow(r)))
     }
 
     /**
