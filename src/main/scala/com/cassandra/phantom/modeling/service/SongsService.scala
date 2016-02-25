@@ -6,11 +6,9 @@ import com.cassandra.phantom.modeling.connector.CassandraConnector
 import com.cassandra.phantom.modeling.entity.Songs
 import com.cassandra.phantom.modeling.model.{GenericSongsModel, SongsByArtistModel, SongsModel}
 import com.websudos.phantom.dsl._
-import com.cassandra.phantom.modeling.util.CassandraUtils._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import scala.util.Try
 
 /**
  * Created by Thiago Pereira on 8/4/15.
@@ -44,14 +42,12 @@ trait SongsService extends CassandraConnector {
      * @return
      */
     def getBySongsId(id: UUID): Future[Option[Songs]] = {
-      val r = songsModel
+      songsModel
         .model
         .select
         .where(_ => songsModel.model.songId eqs id)
-        .statement()
-        .getOneWith(ConsistencyLevel.QUORUM)
-
-      Future(Try(songsModel.model.fromRow(r)).toOption)
+        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
+        .one()
     }
 
     /**
@@ -61,14 +57,12 @@ trait SongsService extends CassandraConnector {
      * @return
      */
     def getSongsByArtist(artist: String): Future[List[Songs]] = {
-      val rows = songsByArtistModel
+      songsByArtistModel
         .model
         .select
         .where(_ => songsByArtistModel.model.artist eqs artist)
-        .statement()
-        .getListWith(ConsistencyLevel.QUORUM)
-
-      Future(rows.map(r => songsByArtistModel.model.fromRow(r)))
+        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
+        .fetch()
     }
 
     /**
@@ -93,16 +87,16 @@ trait SongsService extends CassandraConnector {
         .model
         .delete
         .where(_ => songsModel.model.songId eqs songs.songId)
-        .statement()
-        .runWith(ConsistencyLevel.QUORUM)
+        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
+        .future()
 
       songsByArtistModel
         .model
         .delete
         .where(_ => songsByArtistModel.model.artist eqs songs.artist)
         .and(_ => songsByArtistModel.model.songId eqs songs.songId)
-        .statement()
-        .runWith(ConsistencyLevel.QUORUM)
+        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
+        .future()
     }
 
     /**
@@ -118,8 +112,8 @@ trait SongsService extends CassandraConnector {
         .value(_.title, songs.title)
         .value(_.album, songs.album)
         .value(_.artist, songs.artist)
-        .statement()
-        .runWith(ConsistencyLevel.QUORUM)
+        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
+        .future()
     }
   }
 }
