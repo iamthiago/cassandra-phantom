@@ -1,119 +1,83 @@
 package com.cassandra.phantom.modeling.service
 
-import java.util.UUID
-
-import com.cassandra.phantom.modeling.connector.CassandraConnector
-import com.cassandra.phantom.modeling.entity.Songs
-import com.cassandra.phantom.modeling.model.{GenericSongsModel, SongsByArtistModel, SongsModel}
+import com.cassandra.phantom.modeling.connector.Connector
+import com.cassandra.phantom.modeling.entity.Song
+import com.cassandra.phantom.modeling.model.{ConcreteSongsByArtistModel, ConcreteSongsModel}
+import com.websudos.phantom.db.DatabaseImpl
 import com.websudos.phantom.dsl._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
+
+class SongsDatabase(override val connector: KeySpaceDef) extends DatabaseImpl(connector) {
+  object songsModel extends ConcreteSongsModel with connector.Connector
+  object songsByArtistsModel extends ConcreteSongsByArtistModel with connector.Connector
+}
+
+object DefaultDb extends SongsDatabase(Connector.connector)
+
+trait DatabaseProvider {
+  def database: SongsDatabase
+}
+
+trait DefaultDatabaseProvider extends DatabaseProvider {
+  override val database = DefaultDb
+}
+
+
 /**
- * Created by Thiago Pereira on 8/4/15.
  *
  * Now that we have two tables, we need to insert, update and delete twice, but how?
  */
-trait SongsService extends CassandraConnector {
+trait SongsService extends DatabaseProvider {
 
-  object service {
+  /**
+   * Create the tables if not exists
+   *
+   * @return
+   */
+  def createTables(): Unit = {
+    Await.ready(database.autocreate().future(), 5.seconds)
+  }
 
-    /**
-     * Lets define our models
-     */
-    val songsModel = new SongsModel
-    val songsByArtistModel = new SongsByArtistModel
+  def getSongById(id: UUID): Future[Option[Song]] = {
+    database.songsModel.getBySongId(id)
+  }
 
-    /**
-     * Create the tables if not exists
-     *
-     * @return
-     */
-    def createTables = {
-      Await.ready(songsModel.model.create.ifNotExists().future(), 5.seconds)
-      Await.ready(songsByArtistModel.model.create.ifNotExists().future(), 5.seconds)
-    }
+  /**
+   * Find songs by Artist
+   *
+   * @param artist
+   * @return
+   */
+  def getSongsByArtist(artist: String): Future[List[Song]] = {
+    database.songsByArtistsModel.getByArtist(artist)
+  }
 
-    /**
-     * Find songs by Id
-     *
-     * @param id
-     * @return
-     */
-    def getBySongsId(id: UUID): Future[Option[Songs]] = {
-      songsModel
-        .model
-        .select
-        .where(_ => songsModel.model.songId eqs id)
-        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
-        .one()
-    }
+  /**
+   * Save a song in both tables
+   *
+   * @param songs
+   * @return
+   */
+  def saveOrUpdate(songs: Song): Future[ResultSet] = {
+    for {
+      byId <- database.songsModel.store(songs)
+      byArtist <- database.songsByArtistsModel.store(songs)
+    } yield byArtist
+  }
 
-    /**
-     * Find songs by Artist
-     *
-     * @param artist
-     * @return
-     */
-    def getSongsByArtist(artist: String): Future[List[Songs]] = {
-      songsByArtistModel
-        .model
-        .select
-        .where(_ => songsByArtistModel.model.artist eqs artist)
-        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
-        .fetch()
-    }
-
-    /**
-     * Save a song in both tables
-     *
-     * @param songs
-     * @return
-     */
-    def saveOrUpdate(songs: Songs): Future[ResultSet] = {
-      saveGeneric(songsModel, songs)
-      saveGeneric(songsByArtistModel, songs)
-    }
-
-    /**
-     * Delete a song in both table
-     *
-     * @param songs
-     * @return
-     */
-    def delete(songs: Songs): Future[ResultSet] = {
-      songsModel
-        .model
-        .delete
-        .where(_ => songsModel.model.songId eqs songs.songId)
-        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
-        .future()
-
-      songsByArtistModel
-        .model
-        .delete
-        .where(_ => songsByArtistModel.model.artist eqs songs.artist)
-        .and(_ => songsByArtistModel.model.songId eqs songs.songId)
-        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
-        .future()
-    }
-
-    /**
-     * Helper method to upsert(insert and update) the table according to a model
-     *
-     * @param genericSongsModel
-     * @param songs
-     * @return
-     */
-    private def saveGeneric(genericSongsModel: GenericSongsModel, songs: Songs): Future[ResultSet] = {
-      genericSongsModel.model.insert
-        .value(_.songId, songs.songId)
-        .value(_.title, songs.title)
-        .value(_.album, songs.album)
-        .value(_.artist, songs.artist)
-        .consistencyLevel_=(ConsistencyLevel.LOCAL_QUORUM)
-        .future()
-    }
+  /**
+   * Delete a song in both table
+   *
+   * @param song
+   * @return
+   */
+  def delete(song: Song): Future[ResultSet] = {
+    for {
+      byID <- database.songsModel.deleteById(song.id)
+      byArtist <- database.songsByArtistsModel.deleteByArtistAndId(song.artist, song.id)
+    } yield byArtist
   }
 }
