@@ -25,7 +25,7 @@ libraryDependencies ++= {
 
   Seq(
     "com.websudos"        %%  "phantom-dsl"               % phantomV,
-    "com.websudos"        %%  "phantom-connectors"        % phantomV,
+    "com.websudos"        %%  "util-testing"              % "0.13.0"    % "test, provided",
     "org.scalatest"       %%  "scalatest"                 % "2.2.4"     % "test",
     "com.typesafe"        %   "config"                    % "1.3.0"
   )

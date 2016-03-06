@@ -1,61 +1,70 @@
 package com.cassandra.phantom.modeling.test.service
 
-import java.util.UUID
-
-import com.cassandra.phantom.modeling.entity.Songs
-import com.cassandra.phantom.modeling.service.SongsService
+import com.cassandra.phantom.modeling.entity.Song
+import com.cassandra.phantom.modeling.service.{DefaultDatabaseProvider, SongsService}
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
+import com.websudos.util.testing.{Sample, _}
 import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
- * Created by Thiago Pereira on 8/4/15.
- */
-class SongsTest extends CassandraSpec with BeforeAndAfterAll with SongsService {
+class SongsTest extends CassandraSpec with BeforeAndAfterAll {
+
+  object service extends SongsService with DefaultDatabaseProvider
 
   override def beforeAll(): Unit = {
-    service.createTables
+    service.createTables()
   }
 
-  def fixture(id: UUID) = new {
-    val songs = Songs(id, "Prison Song", "Toxicity", "System of a Down")
+
+  implicit object SongGenerator extends Sample[Song] {
+    override def sample: Song = {
+      Song(
+        UUIDs.timeBased(),
+        gen[ShortString].value,
+        gen[ShortString].value,
+        gen[ShortString].value
+      )
+    }
   }
+
 
   "A Song" should "be inserted into cassandra" in {
-    val uuid = UUIDs.timeBased()
-    val future = service.saveOrUpdate(fixture(uuid).songs)
+    val sample = gen[Song]
+    val future = service.saveOrUpdate(sample)
 
     whenReady(future) { result =>
       result isExhausted() shouldBe true
       result wasApplied() shouldBe true
-      service.delete(fixture(uuid).songs)
+      service.delete(sample)
     }
   }
 
   it should "find a song by id" in {
-    val uuid = UUIDs.timeBased()
-    val future = service.saveOrUpdate(fixture(uuid).songs)
+    val sample = gen[Song]
 
-    whenReady(future) { _ =>
-      val found = service.getBySongsId(fixture(uuid).songs.songId)
-      whenReady(found) { found =>
-        found shouldBe defined
-        service.delete(fixture(uuid).songs)
-      }
+    val chain = for {
+      store <- service.saveOrUpdate(sample)
+      get <- service.getSongById(sample.id)
+      delete <- service.delete(sample)
+    } yield get
+
+    whenReady(chain) { res =>
+      res shouldBe defined
+      service.delete(sample)
     }
   }
 
   it should "find songs by artist" in {
-    val uuid1 = UUIDs.timeBased()
-    val uuid2 = UUIDs.timeBased()
-    val uuid3 = UUIDs.timeBased()
+    val sample = gen[Song]
+    val sample2 = gen[Song]
+    val sample3 = gen[Song]
 
     val future = for {
-      f1 <- service.saveOrUpdate(fixture(uuid1).songs)
-      f2 <- service.saveOrUpdate(fixture(uuid2).songs.copy(title = "Aerials"))
-      f3 <- service.saveOrUpdate(fixture(uuid3).songs.copy(title = "Chop Suey"))
+      f1 <- service.saveOrUpdate(sample)
+      f2 <- service.saveOrUpdate(sample2.copy(title = "Aerials"))
+      f3 <- service.saveOrUpdate(sample3.copy(title = "Chop Suey"))
     } yield (f1, f2, f3)
 
     whenReady(future) { insert =>
@@ -63,35 +72,32 @@ class SongsTest extends CassandraSpec with BeforeAndAfterAll with SongsService {
       whenReady(songsByArtist) { searchResult =>
         searchResult shouldBe a [List[_]]
         searchResult should have length 3
-
-        forAll(searchResult) { song =>
-          song.artist shouldBe "System of a Down"
-        }
-
-        service.delete(fixture(uuid1).songs)
-        service.delete(fixture(uuid2).songs)
-        service.delete(fixture(uuid3).songs)
+        service.delete(sample)
+        service.delete(sample2)
+        service.delete(sample3)
       }
     }
   }
 
   it should "be updated into cassandra" in {
     val uuid = UUIDs.timeBased()
-    val future = service.saveOrUpdate(fixture(uuid).songs)
+    val sample = gen[Song]
+    val updatedTitle = gen[String]
 
-    whenReady(future) { _ =>
-      val foundInserted = service.getBySongsId(fixture(uuid).songs.songId)
-      whenReady(foundInserted) { inserted =>
-        val updated = inserted.get.copy(title = "Aerials")
-        val futureToBeUpdated = service.saveOrUpdate(updated)
-        whenReady(futureToBeUpdated) { x =>
-          val found = service.getBySongsId(fixture(uuid).songs.songId)
-          whenReady(found) { toBeChecked =>
-            toBeChecked shouldBe defined
-            toBeChecked.get.title shouldEqual "Aerials"
-            service.delete(fixture(uuid).songs)
-          }
-        }
+    val chain = for {
+      store <- service.saveOrUpdate(sample)
+      unmodified <- service.getSongById(sample.id)
+      store <- service.saveOrUpdate(sample.copy(title = updatedTitle))
+      modified <- service.getSongById(sample.id)
+    } yield (unmodified, modified)
+
+    whenReady(chain) {
+      case (initial, modified) => {
+        initial shouldBe defined
+        initial.value.title shouldEqual sample.title
+
+        modified shouldBe defined
+        modified.value.title shouldEqual updatedTitle
       }
     }
   }

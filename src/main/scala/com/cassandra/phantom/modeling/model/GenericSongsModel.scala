@@ -2,54 +2,84 @@ package com.cassandra.phantom.modeling.model
 
 import java.util.UUID
 
-import com.cassandra.phantom.modeling.entity.Songs
-import com.datastax.driver.core.Row
-import com.websudos.phantom.CassandraTable
-import com.websudos.phantom.column.TimeUUIDColumn
-import com.websudos.phantom.dsl.StringColumn
-import com.websudos.phantom.keys.{ClusteringOrder, PartitionKey}
+import com.cassandra.phantom.modeling.entity.Song
+import com.websudos.phantom.dsl._
 
-/**
- * Created by Thiago Pereira on 8/4/15.
- *
- * GenericSongsModel define the common fields in your table
- */
-trait GenericSongsModel {
+import scala.concurrent.Future
 
-  def model: InnerGeneric
 
-  trait InnerGeneric extends CassandraTable[InnerGeneric, Songs] {
-    
-    def songId: TimeUUIDColumn[InnerGeneric, Songs]
-    def artist: StringColumn[InnerGeneric, Songs]
-    
-    object title extends StringColumn(this)
-    object album extends StringColumn(this)
+class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
 
-    override def fromRow(r: Row): Songs = Songs(songId(r), title(r), album(r), artist(r))
+  object id extends TimeUUIDColumn(this) with PartitionKey[UUID]
+
+  object artist extends StringColumn(this)
+
+  object title extends StringColumn(this)
+  object album extends StringColumn(this)
+
+  override def fromRow(r: Row): Song = {
+    Song(
+      id(r),
+      title(r),
+      album(r),
+      artist(r)
+    )
   }
 }
 
-/**
- * Following the query-design approach we have two tables,
- * The SongsModel("songs") and the SongsByArtistModel("songs_by_artist")
- */
-class SongsModel extends GenericSongsModel {
-  object model extends InnerGeneric {
+abstract class ConcreteSongsModel extends SongsModel with RootConnector {
 
-    override val tableName = "songs"
-
-    object songId extends TimeUUIDColumn(this) with PartitionKey[UUID] { override lazy val name = "song_id" }
-    object artist extends StringColumn(this)
+  def store(song: Song): Future[ResultSet] = {
+    insert
+      .value(_.id, song.id)
+      .value(_.title, song.title)
+      .value(_.album, song.album)
+      .value(_.artist, song.artist)
+      .future()
   }
+
+  def getBySongId(id: UUID): Future[Option[Song]] = {
+    select.where(_.id eqs id).one()
+  }
+
+  def deleteById(id: UUID): Future[ResultSet] = {
+    delete.where(_.id eqs id).future()
+  }
+
 }
 
-class SongsByArtistModel extends GenericSongsModel {
-  object model extends InnerGeneric {
+class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
+  object artist extends StringColumn(this) with PartitionKey[String]
+  object id extends TimeUUIDColumn(this) with ClusteringOrder[UUID]
+  object title extends StringColumn(this)
+  object album extends StringColumn(this)
 
-    override val tableName = "songs_by_artist"
+  override def fromRow(r: Row): Song = {
+    Song(
+      id(r),
+      title(r),
+      album(r),
+      artist(r)
+    )
+  }
 
-    object artist extends StringColumn(this) with PartitionKey[String]
-    object songId extends TimeUUIDColumn(this) with ClusteringOrder[UUID] { override lazy val name = "song_id" }
+}
+
+abstract class ConcreteSongsByArtistModel extends SongsByArtistModel with RootConnector {
+  def store(songs: Song): Future[ResultSet] = {
+    insert
+      .value(_.id, songs.id)
+      .value(_.title, songs.title)
+      .value(_.album, songs.album)
+      .value(_.artist, songs.artist)
+      .future()
+  }
+
+  def getByArtist(artist: String): Future[List[Song]] = {
+    select.where(_.artist eqs artist).fetch()
+  }
+
+  def deleteByArtistAndId(artist: String, id: UUID): Future[ResultSet] = {
+    delete.where(_.artist eqs artist).and(_.id eqs id).future()
   }
 }

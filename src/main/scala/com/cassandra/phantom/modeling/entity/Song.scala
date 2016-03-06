@@ -7,4 +7,9 @@ import java.util.UUID
  *
  * This is the Scala representation of Songs, following the Datastax example
  */
-case class Songs(songId: UUID, title: String, album: String, artist: String)
+case class Song(
+  id: UUID,
+  title: String,
+  album: String,
+  artist: String
+)
