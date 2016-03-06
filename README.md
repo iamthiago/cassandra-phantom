@@ -100,5 +100,9 @@ This project explore the scala generics to make our life easier and do not dupli
 ## Resources
 
 - [http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html](http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html)
-- [https://github.com/websudos/phantom](https://github.com/websudos/phantom)
+- [https://github.com/outworkers/phantom](https://github.com/outworkers/phantom)
 - [https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e](https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e)
+
+### Thanks
+
+Special thanks to Flavian [https://github.com/alexflav23](https://github.com/alexflav23) who helped me to find out the best way to use phantom to model your Cassandra tables.
