@@ -105,4 +105,4 @@ This project explore the scala generics to make our life easier and do not dupli
 
 ### Thanks
 
-Special thanks to Flavian [https://github.com/alexflav23](https://github.com/alexflav23) who helped me to find out the best way to use phantom to model your Cassandra tables.
+Special thanks to [Flavian](https://github.com/alexflav23) who helped me to find out the best way to use phantom to model your Cassandra tables.
