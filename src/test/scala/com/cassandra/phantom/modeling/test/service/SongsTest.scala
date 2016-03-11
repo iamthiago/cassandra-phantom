@@ -1,7 +1,7 @@
 package com.cassandra.phantom.modeling.test.service
 
 import com.cassandra.phantom.modeling.entity.Song
-import com.cassandra.phantom.modeling.service.{DefaultDatabaseProvider, SongsService}
+import com.cassandra.phantom.modeling.service.SongsService
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
 import com.websudos.util.testing.{Sample, _}
@@ -11,33 +11,29 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SongsTest extends CassandraSpec with BeforeAndAfterAll {
 
-  object service extends SongsService with DefaultDatabaseProvider
-
   override def beforeAll(): Unit = {
-    service.createTables()
+    SongsService.createTables()
   }
-
 
   implicit object SongGenerator extends Sample[Song] {
     override def sample: Song = {
       Song(
         UUIDs.timeBased(),
         gen[ShortString].value,
-        gen[ShortString].value,
-        gen[ShortString].value
+        album = "Toxicity",
+        artist = "System of a Down"
       )
     }
   }
 
-
   "A Song" should "be inserted into cassandra" in {
     val sample = gen[Song]
-    val future = service.saveOrUpdate(sample)
+    val future = SongsService.saveOrUpdate(sample)
 
     whenReady(future) { result =>
       result isExhausted() shouldBe true
       result wasApplied() shouldBe true
-      service.delete(sample)
+      SongsService.delete(sample)
     }
   }
 
@@ -45,14 +41,14 @@ class SongsTest extends CassandraSpec with BeforeAndAfterAll {
     val sample = gen[Song]
 
     val chain = for {
-      store <- service.saveOrUpdate(sample)
-      get <- service.getSongById(sample.id)
-      delete <- service.delete(sample)
+      store <- SongsService.saveOrUpdate(sample)
+      get <- SongsService.getSongById(sample.id)
+      delete <- SongsService.delete(sample)
     } yield get
 
     whenReady(chain) { res =>
       res shouldBe defined
-      service.delete(sample)
+      SongsService.delete(sample)
     }
   }
 
@@ -62,43 +58,43 @@ class SongsTest extends CassandraSpec with BeforeAndAfterAll {
     val sample3 = gen[Song]
 
     val future = for {
-      f1 <- service.saveOrUpdate(sample)
-      f2 <- service.saveOrUpdate(sample2.copy(title = "Aerials"))
-      f3 <- service.saveOrUpdate(sample3.copy(title = "Chop Suey"))
+      f1 <- SongsService.saveOrUpdate(sample.copy(title = "Toxicity"))
+      f2 <- SongsService.saveOrUpdate(sample2.copy(title = "Aerials"))
+      f3 <- SongsService.saveOrUpdate(sample3.copy(title = "Chop Suey"))
     } yield (f1, f2, f3)
 
     whenReady(future) { insert =>
-      val songsByArtist = service.getSongsByArtist("System of a Down")
+      val songsByArtist = SongsService.getSongsByArtist("System of a Down")
       whenReady(songsByArtist) { searchResult =>
         searchResult shouldBe a [List[_]]
         searchResult should have length 3
-        service.delete(sample)
-        service.delete(sample2)
-        service.delete(sample3)
+        SongsService.delete(sample)
+        SongsService.delete(sample2)
+        SongsService.delete(sample3)
       }
     }
   }
 
   it should "be updated into cassandra" in {
-    val uuid = UUIDs.timeBased()
     val sample = gen[Song]
     val updatedTitle = gen[String]
 
     val chain = for {
-      store <- service.saveOrUpdate(sample)
-      unmodified <- service.getSongById(sample.id)
-      store <- service.saveOrUpdate(sample.copy(title = updatedTitle))
-      modified <- service.getSongById(sample.id)
+      store <- SongsService.saveOrUpdate(sample)
+      unmodified <- SongsService.getSongById(sample.id)
+      store <- SongsService.saveOrUpdate(sample.copy(title = updatedTitle))
+      modified <- SongsService.getSongById(sample.id)
     } yield (unmodified, modified)
 
     whenReady(chain) {
-      case (initial, modified) => {
+      case (initial, modified) =>
         initial shouldBe defined
         initial.value.title shouldEqual sample.title
 
         modified shouldBe defined
         modified.value.title shouldEqual updatedTitle
-      }
+
+        SongsService.delete(modified.get)
     }
   }
 }

@@ -10,10 +10,8 @@ import scala.concurrent.Future
 
 class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
 
-  object id extends TimeUUIDColumn(this) with PartitionKey[UUID]
-
+  object id extends TimeUUIDColumn(this) with PartitionKey[UUID] { override lazy val name = "song_id" }
   object artist extends StringColumn(this)
-
   object title extends StringColumn(this)
   object album extends StringColumn(this)
 
@@ -28,6 +26,12 @@ class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
 }
 
 abstract class ConcreteSongsModel extends SongsModel with RootConnector {
+
+  override def tableName: String = "songs"
+
+  def createTable(): Future[ResultSet] = {
+    create.ifNotExists().future()
+  }
 
   def store(song: Song): Future[ResultSet] = {
     insert
@@ -50,7 +54,7 @@ abstract class ConcreteSongsModel extends SongsModel with RootConnector {
 
 class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
   object artist extends StringColumn(this) with PartitionKey[String]
-  object id extends TimeUUIDColumn(this) with ClusteringOrder[UUID]
+  object id extends TimeUUIDColumn(this) with ClusteringOrder[UUID] { override lazy val name = "song_id" }
   object title extends StringColumn(this)
   object album extends StringColumn(this)
 
@@ -66,6 +70,13 @@ class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
 }
 
 abstract class ConcreteSongsByArtistModel extends SongsByArtistModel with RootConnector {
+
+  override def tableName: String = "songs_by_artist"
+
+  def createTable(): Future[ResultSet] = {
+    create.ifNotExists().future()
+  }
+
   def store(songs: Song): Future[ResultSet] = {
     insert
       .value(_.id, songs.id)

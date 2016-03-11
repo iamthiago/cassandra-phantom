@@ -38,7 +38,12 @@ trait SongsService extends DatabaseProvider {
    * @return
    */
   def createTables(): Unit = {
-    Await.ready(database.autocreate().future(), 5.seconds)
+    val f = for {
+      cre1 <- database.songsModel.createTable()
+      cre2 <- database.songsByArtistsModel.createTable()
+    } yield (cre1, cre2)
+
+    Await.result(f, 5.seconds)
   }
 
   def getSongById(id: UUID): Future[Option[Song]] = {
@@ -81,3 +86,5 @@ trait SongsService extends DatabaseProvider {
     } yield byArtist
   }
 }
+
+object SongsService extends SongsService with DefaultDatabaseProvider
