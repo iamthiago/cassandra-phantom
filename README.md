@@ -83,12 +83,6 @@ artist           | song_id                               | album    | title
  System of a Down | b49e6ea1-3abd-11e5-9032-1572798d8cfa | Toxicity |   Chop Suey
 ```
 
-### Phantom
-
-Looking at the documentation, it shows simple examples on how to get your cassandra table into scala.
-
-This project explore the scala generics to make our life easier and do not duplicate code when creating the same table with different partitions key.
-
 ## Features
 
 #### Apart of data modeling, you will also find:
