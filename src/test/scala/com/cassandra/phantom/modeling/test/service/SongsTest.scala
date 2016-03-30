@@ -5,15 +5,10 @@ import com.cassandra.phantom.modeling.service.SongsService
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
 import com.websudos.util.testing.{Sample, _}
-import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SongsTest extends CassandraSpec with BeforeAndAfterAll {
-
-  override def beforeAll(): Unit = {
-    SongsService.createTables()
-  }
+class SongsTest extends CassandraSpec {
 
   implicit object SongGenerator extends Sample[Song] {
     override def sample: Song = {
