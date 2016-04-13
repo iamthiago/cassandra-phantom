@@ -25,13 +25,6 @@ trait DefaultDatabaseProvider extends DatabaseProvider {
   override val database = DefaultDb
 }
 
-object TestDb extends SongsDatabase(Connector.testConnector)
-
-trait TestDatabaseProvider {
-  val database = TestDb
-}
-
-
 /**
  *
  * Now that we have two tables, we need to insert, update and delete twice, but how?

@@ -1,14 +1,21 @@
 package com.cassandra.phantom.modeling.test.service
 
+import com.cassandra.phantom.modeling.connector.Connector
 import com.cassandra.phantom.modeling.entity.Song
-import com.cassandra.phantom.modeling.service.SongsService
+import com.cassandra.phantom.modeling.service.{DefaultDatabaseProvider, SongsService}
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
 import com.websudos.util.testing.{Sample, _}
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
-class SongsTest extends CassandraSpec {
+class SongsTest extends CassandraSpec with DefaultDatabaseProvider with Connector.connector.Connector {
+
+  override def beforeAll(): Unit = {
+    Await.result(database.autocreate().future(), 5.seconds)
+  }
 
   implicit object SongGenerator extends Sample[Song] {
     override def sample: Song = {
