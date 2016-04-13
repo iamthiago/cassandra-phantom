@@ -24,7 +24,7 @@ object Connector {
       config.getString("cassandra.username"),
       config.getString("cassandra.password")
     )
-  ).keySpace(keyspace)
+  )
 
   /**
     * Create an embedded connector, used for testing purposes

@@ -21,7 +21,7 @@ class SongsDatabase(override val connector: KeySpaceDef) extends DatabaseImpl(co
 /**
   * This is the production database, it connects to a secured cluster with multiple contact points
   */
-object ProductionDb extends SongsDatabase(connector)
+object ProductionDb extends SongsDatabase(connector.keySpace(keyspace))
 
 trait ProductionDatabaseProvider {
   def database: SongsDatabase
