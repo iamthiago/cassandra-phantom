@@ -5,12 +5,19 @@ import com.cassandra.phantom.modeling.database.EmbeddedDatabase
 import com.cassandra.phantom.modeling.entity.Song
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
+import com.websudos.phantom.dsl.ResultSet
 import com.websudos.util.testing.{Sample, _}
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
+/**
+  * Tests Songs methods against an embedded cassandra
+  *
+  * Before executing it will create all necessary tables in our embedded cassandra
+  * validating our model with the requirements described in the readme.md file
+  */
 class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testConnector.Connector {
 
   override def beforeAll(): Unit = {
@@ -100,13 +107,25 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
     }
   }
 
-  private def store(song: Song) = {
+  /**
+    * Utility method to store into both tables
+    *
+    * @param song the song to be inserted
+    * @return a [[Future]] of [[ResultSet]]
+    */
+  private def store(song: Song): Future[ResultSet] = {
     for {
       byId <- database.songsModel.store(song)
       byArtist <- database.songsByArtistsModel.store(song)
     } yield byArtist
   }
 
+  /**
+    * Utility method to delete into both tables
+    *
+    * @param song the song to be deleted
+    * @return a [[Future]] of [[ResultSet]]
+    */
   private def drop(song: Song) = {
     for {
       byID <- database.songsModel.deleteById(song.id)

@@ -9,6 +9,12 @@ import scala.concurrent.Future
 /**
  *
  * Now that we have two tables, we need to insert, update and delete twice, but how?
+  *
+  * We are going to use the methods we have implemented in our two models
+  * [[com.cassandra.phantom.modeling.model.SongsModel]] and
+  * [[com.cassandra.phantom.modeling.model.SongsByArtistModel]]
+  * taking advantage of the futures and running it in parallel through for loop
+  *
  */
 trait SongsService extends ProductionDatabaseProvider {
 
@@ -53,4 +59,7 @@ trait SongsService extends ProductionDatabaseProvider {
   }
 }
 
+/**
+  * Let available a singleton instance of this service class, to prevent unnecessary instances
+  */
 object SongsService extends SongsService with ProductionDatabase

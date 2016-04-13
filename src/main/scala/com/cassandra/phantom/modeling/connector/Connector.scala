@@ -15,12 +15,19 @@ object Connector {
 
   val keyspace: String = config.getString("cassandra.keyspace")
 
+  /**
+    * Create a connector with the ability to connects to
+    * multiple hosts in a secured cluster
+    */
   val connector = ContactPoints(hosts).withClusterBuilder(
     _.withCredentials(
       config.getString("cassandra.username"),
       config.getString("cassandra.password")
     )
-  )
+  ).keySpace(keyspace)
 
+  /**
+    * Create an embedded connector, used for testing purposes
+    */
   val testConnector = ContactPoint.embedded.noHeartbeat().keySpace("my_app_test")
 }

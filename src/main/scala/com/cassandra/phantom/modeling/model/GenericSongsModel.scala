@@ -7,8 +7,12 @@ import com.websudos.phantom.dsl._
 
 import scala.concurrent.Future
 
-
+/**
+  * Create the Cassandra representation of the Songs table
+  */
 class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
+
+  override def tableName: String = "songs"
 
   object id extends TimeUUIDColumn(this) with PartitionKey[UUID] { override lazy val name = "song_id" }
   object artist extends StringColumn(this)
@@ -25,13 +29,10 @@ class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
   }
 }
 
+/**
+  * Define the available methods for this model
+  */
 abstract class ConcreteSongsModel extends SongsModel with RootConnector {
-
-  override def tableName: String = "songs"
-
-  def createTable(): Future[ResultSet] = {
-    create.ifNotExists().future()
-  }
 
   def store(song: Song): Future[ResultSet] = {
     insert
@@ -52,7 +53,13 @@ abstract class ConcreteSongsModel extends SongsModel with RootConnector {
 
 }
 
+/**
+  * Create the Cassandra representation of the Songs by Artist table
+  */
 class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
+
+  override def tableName: String = "songs_by_artist"
+
   object artist extends StringColumn(this) with PartitionKey[String]
   object id extends TimeUUIDColumn(this) with ClusteringOrder[UUID] { override lazy val name = "song_id" }
   object title extends StringColumn(this)
@@ -66,12 +73,12 @@ class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
       artist(r)
     )
   }
-
 }
 
+/**
+  * Define the available methods for this model
+  */
 abstract class ConcreteSongsByArtistModel extends SongsByArtistModel with RootConnector {
-
-  override def tableName: String = "songs_by_artist"
 
   def createTable(): Future[ResultSet] = {
     create.ifNotExists().future()

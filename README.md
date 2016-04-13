@@ -1,5 +1,7 @@
 # Cassandra + Phantom Example
 
+[![Build Status](https://travis-ci.org/thiagoandrade6/cassandra-phantom.svg?branch=master)](https://travis-ci.org/thiagoandrade6/cassandra-phantom)
+
 This project will give you the idea on how to design your cassandra tables in scala using the phantom dsl.
 
 ## Data Modeling Concepts
@@ -89,7 +91,8 @@ artist           | song_id                               | album    | title
 
 - Connect to a secure(user/password) Cassandra Cluster
 - Set Consistency Level for any kind of statement
-- Handle inserts/deletes for duplicate tables
+- Handle inserts/deletes for multiple tables
+- Testing using an embedded Cassandra in memory
 
 ## Resources
 
@@ -99,4 +102,4 @@ artist           | song_id                               | album    | title
 
 ### Thanks
 
-Special thanks to [Flavian](https://github.com/alexflav23) who helped me to find out the best way to use phantom to model your Cassandra tables.
+Special thanks to [Flavian](https://github.com/alexflav23) who helped me to find out the best way to use phantom to model our Cassandra tables.

@@ -7,6 +7,11 @@ import com.cassandra.phantom.modeling.connector.Connector._
 
 /**
   * Created by thiago on 4/13/16.
+  *
+  * This is our Database object that wraps our two existing tables,
+  * giving the ability to receive different connectors
+  * for example: One for production and other for testing
+  *
   */
 class SongsDatabase(override val connector: KeySpaceDef) extends DatabaseImpl(connector) {
   object songsModel extends ConcreteSongsModel with connector.Connector
@@ -14,9 +19,9 @@ class SongsDatabase(override val connector: KeySpaceDef) extends DatabaseImpl(co
 }
 
 /**
-  * Production Database
+  * This is the production database, it connects to a secured cluster with multiple contact points
   */
-object ProductionDb extends SongsDatabase(connector.keySpace(keyspace))
+object ProductionDb extends SongsDatabase(connector)
 
 trait ProductionDatabaseProvider {
   def database: SongsDatabase
@@ -27,7 +32,8 @@ trait ProductionDatabase extends ProductionDatabaseProvider {
 }
 
 /**
-  * Embedded Database
+  * Thanks for the Phantom plugin, you can start an embedded cassandra in memory,
+  * in this case we are using it for tests
   */
 object EmbeddedDb extends SongsDatabase(testConnector)
 
