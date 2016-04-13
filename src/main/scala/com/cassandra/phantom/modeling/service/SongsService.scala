@@ -1,49 +1,16 @@
 package com.cassandra.phantom.modeling.service
 
-import com.cassandra.phantom.modeling.connector.Connector
+import com.cassandra.phantom.modeling.database.{ProductionDatabase, ProductionDatabaseProvider}
 import com.cassandra.phantom.modeling.entity.Song
-import com.cassandra.phantom.modeling.model.{ConcreteSongsByArtistModel, ConcreteSongsModel}
-import com.websudos.phantom.db.DatabaseImpl
 import com.websudos.phantom.dsl._
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
-
-
-class SongsDatabase(override val connector: KeySpaceDef) extends DatabaseImpl(connector) {
-  object songsModel extends ConcreteSongsModel with connector.Connector
-  object songsByArtistsModel extends ConcreteSongsByArtistModel with connector.Connector
-}
-
-object DefaultDb extends SongsDatabase(Connector.connector)
-
-trait DatabaseProvider {
-  def database: SongsDatabase
-}
-
-trait DefaultDatabaseProvider extends DatabaseProvider {
-  override val database = DefaultDb
-}
+import scala.concurrent.Future
 
 /**
  *
  * Now that we have two tables, we need to insert, update and delete twice, but how?
  */
-trait SongsService extends DatabaseProvider {
-
-  /**
-   * Create the tables if not exists
-   *
-   * @return
-   */
-  def createTables(): Unit = {
-    val f = for {
-      cre1 <- database.songsModel.createTable()
-      cre2 <- database.songsByArtistsModel.createTable()
-    } yield (cre1, cre2)
-
-    Await.result(f, 5.seconds)
-  }
+trait SongsService extends ProductionDatabaseProvider {
 
   def getSongById(id: UUID): Future[Option[Song]] = {
     database.songsModel.getBySongId(id)
@@ -86,4 +53,4 @@ trait SongsService extends DatabaseProvider {
   }
 }
 
-object SongsService extends SongsService with DefaultDatabaseProvider
+object SongsService extends SongsService with ProductionDatabase

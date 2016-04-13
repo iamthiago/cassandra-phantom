@@ -20,5 +20,7 @@ object Connector {
       config.getString("cassandra.username"),
       config.getString("cassandra.password")
     )
-  ).keySpace(keyspace)
+  )
+
+  val testConnector = ContactPoint.embedded.noHeartbeat().keySpace("my_app_test")
 }
