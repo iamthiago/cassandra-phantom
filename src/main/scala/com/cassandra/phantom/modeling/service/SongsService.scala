@@ -25,7 +25,6 @@ trait DefaultDatabaseProvider extends DatabaseProvider {
   override val database = DefaultDb
 }
 
-
 /**
  *
  * Now that we have two tables, we need to insert, update and delete twice, but how?

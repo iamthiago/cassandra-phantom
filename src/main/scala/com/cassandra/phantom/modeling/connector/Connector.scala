@@ -3,7 +3,7 @@ package com.cassandra.phantom.modeling.connector
 import java.net.InetAddress
 
 import com.typesafe.config.ConfigFactory
-import com.websudos.phantom.connectors.ContactPoints
+import com.websudos.phantom.connectors.{ContactPoint, ContactPoints}
 
 import scala.collection.JavaConversions._
 
