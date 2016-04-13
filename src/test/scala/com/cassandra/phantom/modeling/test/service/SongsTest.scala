@@ -29,28 +29,28 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
   }
 
   "A Song" should "be inserted into cassandra" in {
-    val song = gen[Song]
-    val future = this.store(song)
+    val sample = gen[Song]
+    val future = this.store(sample)
 
     whenReady(future) { result =>
       result isExhausted() shouldBe true
       result wasApplied() shouldBe true
-      this.drop(song)
+      this.drop(sample)
     }
   }
 
-  /*it should "find a song by id" in {
+  it should "find a song by id" in {
     val sample = gen[Song]
 
     val chain = for {
-      store <- songsService.saveOrUpdate(sample)
-      get <- songsService.getSongById(sample.id)
-      delete <- songsService.delete(sample)
+      store <- this.store(sample)
+      get <- database.songsModel.getBySongId(sample.id)
+      delete <- this.drop(sample)
     } yield get
 
     whenReady(chain) { res =>
       res shouldBe defined
-      songsService.delete(sample)
+      this.drop(sample)
     }
   }
 
@@ -60,19 +60,19 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
     val sample3 = gen[Song]
 
     val future = for {
-      f1 <- songsService.saveOrUpdate(sample.copy(title = "Toxicity"))
-      f2 <- songsService.saveOrUpdate(sample2.copy(title = "Aerials"))
-      f3 <- songsService.saveOrUpdate(sample3.copy(title = "Chop Suey"))
+      f1 <- this.store(sample.copy(title = "Toxicity"))
+      f2 <- this.store(sample2.copy(title = "Aerials"))
+      f3 <- this.store(sample3.copy(title = "Chop Suey"))
     } yield (f1, f2, f3)
 
     whenReady(future) { insert =>
-      val songsByArtist = songsService.getSongsByArtist("System of a Down")
+      val songsByArtist = database.songsByArtistsModel.getByArtist("System of a Down")
       whenReady(songsByArtist) { searchResult =>
         searchResult shouldBe a [List[_]]
         searchResult should have length 3
-        songsService.delete(sample)
-        songsService.delete(sample2)
-        songsService.delete(sample3)
+        this.drop(sample)
+        this.drop(sample2)
+        this.drop(sample3)
       }
     }
   }
@@ -82,10 +82,10 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
     val updatedTitle = gen[String]
 
     val chain = for {
-      store <- songsService.saveOrUpdate(sample)
-      unmodified <- songsService.getSongById(sample.id)
-      store <- songsService.saveOrUpdate(sample.copy(title = updatedTitle))
-      modified <- songsService.getSongById(sample.id)
+      store <- this.store(sample)
+      unmodified <- database.songsModel.getBySongId(sample.id)
+      store <- this.store(sample.copy(title = updatedTitle))
+      modified <- database.songsModel.getBySongId(sample.id)
     } yield (unmodified, modified)
 
     whenReady(chain) {
@@ -96,9 +96,9 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
         modified shouldBe defined
         modified.value.title shouldEqual updatedTitle
 
-        songsService.delete(modified.get)
+        this.drop(modified.get)
     }
-  }*/
+  }
 
   private def store(song: Song) = {
     for {
