@@ -93,6 +93,7 @@ artist           | song_id                               | album    | title
 - Set Consistency Level for any kind of statement
 - Handle inserts/deletes for multiple tables
 - Testing using an embedded Cassandra in memory
+- Simple streaming example, for big data using Akka Streams
 
 ## Resources
 
