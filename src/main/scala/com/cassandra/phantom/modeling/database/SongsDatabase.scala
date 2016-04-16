@@ -1,9 +1,9 @@
 package com.cassandra.phantom.modeling.database
 
+import com.cassandra.phantom.modeling.connector.Connector._
 import com.cassandra.phantom.modeling.model.{ConcreteSongsByArtistModel, ConcreteSongsModel}
 import com.websudos.phantom.db.DatabaseImpl
 import com.websudos.phantom.dsl._
-import com.cassandra.phantom.modeling.connector.Connector._
 
 /**
   * Created by thiago on 4/13/16.
@@ -21,7 +21,7 @@ class SongsDatabase(override val connector: KeySpaceDef) extends DatabaseImpl(co
 /**
   * This is the production database, it connects to a secured cluster with multiple contact points
   */
-object ProductionDb extends SongsDatabase(connector.keySpace(keyspace))
+object ProductionDb extends SongsDatabase(connector)
 
 trait ProductionDatabaseProvider {
   def database: SongsDatabase

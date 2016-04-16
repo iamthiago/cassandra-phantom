@@ -3,6 +3,7 @@ package com.cassandra.phantom.modeling.service
 import com.cassandra.phantom.modeling.database.{ProductionDatabase, ProductionDatabaseProvider}
 import com.cassandra.phantom.modeling.entity.Song
 import com.websudos.phantom.dsl._
+import org.reactivestreams.Publisher
 
 import scala.concurrent.Future
 
@@ -18,6 +19,11 @@ import scala.concurrent.Future
  */
 trait SongsService extends ProductionDatabaseProvider {
 
+  /**
+    * Find songs by Id
+    * @param id
+    * @return
+    */
   def getSongById(id: UUID): Future[Option[Song]] = {
     database.songsModel.getBySongId(id)
   }
@@ -30,6 +36,15 @@ trait SongsService extends ProductionDatabaseProvider {
    */
   def getSongsByArtist(artist: String): Future[List[Song]] = {
     database.songsByArtistsModel.getByArtist(artist)
+  }
+
+  /**
+    * Gives to you a [[Publisher]] of [[Song]] to play with Akka Streams
+    *
+    * @return
+    */
+  def publisher: Publisher[Song] = {
+    database.songsModel.publisher
   }
 
   /**

@@ -21,13 +21,19 @@ resolvers ++= Seq(
 
 libraryDependencies ++= {
 
+  val akkaV = "2.4.4"
   val phantomV = "1.22.0"
 
   Seq(
-    "com.websudos"        %%  "phantom-dsl"               % phantomV,
-    "com.websudos"        %%  "util-testing"              % "0.13.0"    % "test, provided",
-    "org.scalatest"       %%  "scalatest"                 % "2.2.4"     % "test",
-    "com.typesafe"        %   "config"                    % "1.3.0"
+    "com.websudos"        %%  "phantom-dsl"                 % phantomV,
+    "com.websudos"        %%  "util-testing"                % "0.13.0"    % "test, provided",
+    "org.scalatest"       %%  "scalatest"                   % "2.2.4"     % "test",
+    "com.typesafe.akka"   %%  "akka-actor"                  % akkaV,
+    "com.typesafe.akka"   %%  "akka-stream"                 % akkaV,
+    "com.typesafe.akka"   %%  "akka-slf4j"                  % akkaV,
+    "com.typesafe.akka"   %%  "akka-testkit"                % akkaV,
+    "com.typesafe.akka"   %%  "akka-stream-testkit"         % akkaV,
+    "com.typesafe.play"   %%  "play-streams-experimental"   % "2.4.6"
   )
 }
 
