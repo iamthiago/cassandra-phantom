@@ -8,9 +8,9 @@ import com.datastax.driver.core.utils.UUIDs
 import com.websudos.phantom.dsl.ResultSet
 import com.websudos.util.testing.{Sample, _}
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 /**
   * Tests Songs methods against an embedded cassandra
@@ -20,6 +20,16 @@ import scala.concurrent.duration._
   */
 class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testConnector.Connector {
 
+  /**
+    * When extending your database in this case [[EmbeddedDatabase]]
+    * you can access different methods related to your database such as
+    * autocreate(), autodrop() and autotruncate() that create,
+    * drop or truncate all your tables inside that database.
+    *
+    * Extending the [[Connector]] will give to you for free
+    * the implicit of session and keyspace, needed for the .future()
+    *
+    */
   override def beforeAll(): Unit = {
     Await.result(database.autocreate().future(), 5.seconds)
   }

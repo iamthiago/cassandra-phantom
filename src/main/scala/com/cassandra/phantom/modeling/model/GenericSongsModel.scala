@@ -4,6 +4,9 @@ import java.util.UUID
 
 import com.cassandra.phantom.modeling.entity.Song
 import com.websudos.phantom.dsl._
+import org.reactivestreams.Publisher
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.streams.Streams
 
 import scala.concurrent.Future
 
@@ -19,20 +22,22 @@ class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
   object title extends StringColumn(this)
   object album extends StringColumn(this)
 
-  override def fromRow(r: Row): Song = {
-    Song(
-      id(r),
-      title(r),
-      album(r),
-      artist(r)
-    )
-  }
+  override def fromRow(r: Row): Song = Song(id(r), title(r), album(r), artist(r))
 }
 
 /**
   * Define the available methods for this model
   */
 abstract class ConcreteSongsModel extends SongsModel with RootConnector {
+
+  def getBySongId(id: UUID): Future[Option[Song]] = {
+    select.where(_.id eqs id).one()
+  }
+
+  def publisher: Publisher[Song] = {
+    val enumerator = select.fetchEnumerator() andThen Enumerator.eof
+    Streams.enumeratorToPublisher(enumerator)
+  }
 
   def store(song: Song): Future[ResultSet] = {
     insert
@@ -43,14 +48,9 @@ abstract class ConcreteSongsModel extends SongsModel with RootConnector {
       .future()
   }
 
-  def getBySongId(id: UUID): Future[Option[Song]] = {
-    select.where(_.id eqs id).one()
-  }
-
   def deleteById(id: UUID): Future[ResultSet] = {
     delete.where(_.id eqs id).future()
   }
-
 }
 
 /**
@@ -65,24 +65,13 @@ class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
   object title extends StringColumn(this)
   object album extends StringColumn(this)
 
-  override def fromRow(r: Row): Song = {
-    Song(
-      id(r),
-      title(r),
-      album(r),
-      artist(r)
-    )
-  }
+  override def fromRow(r: Row): Song = Song(id(r), title(r), album(r), artist(r))
 }
 
 /**
   * Define the available methods for this model
   */
 abstract class ConcreteSongsByArtistModel extends SongsByArtistModel with RootConnector {
-
-  def createTable(): Future[ResultSet] = {
-    create.ifNotExists().future()
-  }
 
   def store(songs: Song): Future[ResultSet] = {
     insert
