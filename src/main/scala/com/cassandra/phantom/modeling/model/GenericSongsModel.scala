@@ -34,7 +34,7 @@ abstract class ConcreteSongsModel extends SongsModel with RootConnector {
     select.where(_.id eqs id).one()
   }
 
-  def publisher: Publisher[Song] = {
+  def playPublisher: Publisher[Song] = {
     val enumerator = select.fetchEnumerator() andThen Enumerator.eof
     Streams.enumeratorToPublisher(enumerator)
   }

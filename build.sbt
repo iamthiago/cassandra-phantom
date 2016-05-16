@@ -26,6 +26,7 @@ libraryDependencies ++= {
 
   Seq(
     "com.websudos"        %%  "phantom-dsl"                 % phantomV,
+    "com.websudos"        %%  "phantom-reactivestreams"     % phantomV,
     "com.websudos"        %%  "util-testing"                % "0.13.0"    % "test, provided",
     "org.scalatest"       %%  "scalatest"                   % "2.2.4"     % "test",
     "com.typesafe.akka"   %%  "akka-actor"                  % akkaV,

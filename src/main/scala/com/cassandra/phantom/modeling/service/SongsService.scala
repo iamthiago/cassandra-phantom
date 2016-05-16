@@ -3,6 +3,7 @@ package com.cassandra.phantom.modeling.service
 import com.cassandra.phantom.modeling.database.{ProductionDatabase, ProductionDatabaseProvider}
 import com.cassandra.phantom.modeling.entity.Song
 import com.websudos.phantom.dsl._
+import com.websudos.phantom.reactivestreams._
 import org.reactivestreams.Publisher
 
 import scala.concurrent.Future
@@ -40,11 +41,21 @@ trait SongsService extends ProductionDatabaseProvider {
 
   /**
     * Gives to you a [[Publisher]] of [[Song]] to play with Akka Streams
+    * based on Play Streams
     *
     * @return
     */
-  def publisher: Publisher[Song] = {
-    database.songsModel.publisher
+  def playPublisher: Publisher[Song] = {
+    database.songsModel.playPublisher
+  }
+
+  /**
+    * Gives to you a [[Publisher]] of [[Song]] based on phantom reactive streams
+    *
+    * @return
+    */
+  def phantomPublisher: Publisher[Song] = {
+    database.songsModel.publisher()
   }
 
   /**

@@ -47,7 +47,7 @@ object SongsStreaming extends ProductionDatabase with Connector.connector.Connec
     implicit val system = ActorSystem("QuickStart")
     implicit val materializer = ActorMaterializer()
 
-    val songs = Source.fromPublisher(SongsService.publisher)
+    val songs = Source.fromPublisher(SongsService.playPublisher)
 
     val count: Flow[Song, Int, NotUsed] = Flow[Song].map(_ => 1)
 
