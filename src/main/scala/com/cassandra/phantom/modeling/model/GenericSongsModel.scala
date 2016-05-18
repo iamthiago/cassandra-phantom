@@ -4,9 +4,6 @@ import java.util.UUID
 
 import com.cassandra.phantom.modeling.entity.Song
 import com.websudos.phantom.dsl._
-import org.reactivestreams.Publisher
-import play.api.libs.iteratee.Enumerator
-import play.api.libs.streams.Streams
 
 import scala.concurrent.Future
 
@@ -31,12 +28,10 @@ class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
 abstract class ConcreteSongsModel extends SongsModel with RootConnector {
 
   def getBySongId(id: UUID): Future[Option[Song]] = {
-    select.where(_.id eqs id).one()
-  }
-
-  def playPublisher: Publisher[Song] = {
-    val enumerator = select.fetchEnumerator() andThen Enumerator.eof
-    Streams.enumeratorToPublisher(enumerator)
+    select
+      .where(_.id eqs id)
+      .consistencyLevel_=(ConsistencyLevel.ONE)
+      .one()
   }
 
   def store(song: Song): Future[ResultSet] = {
@@ -45,11 +40,15 @@ abstract class ConcreteSongsModel extends SongsModel with RootConnector {
       .value(_.title, song.title)
       .value(_.album, song.album)
       .value(_.artist, song.artist)
+      .consistencyLevel_=(ConsistencyLevel.ONE)
       .future()
   }
 
   def deleteById(id: UUID): Future[ResultSet] = {
-    delete.where(_.id eqs id).future()
+    delete
+      .where(_.id eqs id)
+      .consistencyLevel_=(ConsistencyLevel.ONE)
+      .future()
   }
 }
 
@@ -73,20 +72,28 @@ class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
   */
 abstract class ConcreteSongsByArtistModel extends SongsByArtistModel with RootConnector {
 
+  def getByArtist(artist: String): Future[List[Song]] = {
+    select
+      .where(_.artist eqs artist)
+      .consistencyLevel_=(ConsistencyLevel.ONE)
+      .fetch()
+  }
+
   def store(songs: Song): Future[ResultSet] = {
     insert
       .value(_.id, songs.id)
       .value(_.title, songs.title)
       .value(_.album, songs.album)
       .value(_.artist, songs.artist)
+      .consistencyLevel_=(ConsistencyLevel.ONE)
       .future()
   }
 
-  def getByArtist(artist: String): Future[List[Song]] = {
-    select.where(_.artist eqs artist).fetch()
-  }
-
   def deleteByArtistAndId(artist: String, id: UUID): Future[ResultSet] = {
-    delete.where(_.artist eqs artist).and(_.id eqs id).future()
+    delete
+      .where(_.artist eqs artist)
+      .and(_.id eqs id)
+      .consistencyLevel_=(ConsistencyLevel.ONE)
+      .future()
   }
 }

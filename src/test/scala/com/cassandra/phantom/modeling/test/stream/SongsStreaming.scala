@@ -9,6 +9,7 @@ import com.cassandra.phantom.modeling.database.ProductionDatabase
 import com.cassandra.phantom.modeling.entity.Song
 import com.cassandra.phantom.modeling.service.SongsService
 import com.datastax.driver.core.utils.UUIDs
+import com.websudos.phantom.reactivestreams._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -47,19 +48,10 @@ object SongsStreaming extends ProductionDatabase with Connector.connector.Connec
     implicit val system = ActorSystem("QuickStart")
     implicit val materializer = ActorMaterializer()
 
-    val songs = Source.fromPublisher(SongsService.playPublisher)
-
-    val count: Flow[Song, Int, NotUsed] = Flow[Song].map(_ => 1)
-
-    val sumSink: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
-
-    val counterGraph: RunnableGraph[Future[Int]] =
-      songs
-        .via(count)
-        .toMat(sumSink)(Keep.right)
-
-    val sum: Future[Int] = counterGraph.run()
-
-    sum.foreach(c => println(s"Total songs processed: $c"))
+    Source
+      .fromPublisher(database.songsModel.publisher())
+      .via(Flow[Song].map(song => s"Title: ${song.title} - Album: ${song.album} - Artist: ${song.artist}"))
+      .to(Sink.foreach(println))
+      .run()
   }
 }
