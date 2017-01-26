@@ -3,7 +3,7 @@ package com.cassandra.phantom.modeling.model
 import java.util.UUID
 
 import com.cassandra.phantom.modeling.entity.Song
-import com.websudos.phantom.dsl._
+import com.outworkers.phantom.dsl._
 
 import scala.concurrent.Future
 
@@ -14,9 +14,14 @@ class SongsModel extends CassandraTable[ConcreteSongsModel, Song] {
 
   override def tableName: String = "songs"
 
-  object id extends TimeUUIDColumn(this) with PartitionKey[UUID] { override lazy val name = "song_id" }
+  object id extends TimeUUIDColumn(this) with PartitionKey {
+    override lazy val name = "song_id"
+  }
+
   object artist extends StringColumn(this)
+
   object title extends StringColumn(this)
+
   object album extends StringColumn(this)
 
   override def fromRow(r: Row): Song = Song(id(r), title(r), album(r), artist(r))
@@ -59,9 +64,14 @@ class SongsByArtistModel extends CassandraTable[SongsByArtistModel, Song] {
 
   override def tableName: String = "songs_by_artist"
 
-  object artist extends StringColumn(this) with PartitionKey[String]
-  object id extends TimeUUIDColumn(this) with ClusteringOrder[UUID] { override lazy val name = "song_id" }
+  object artist extends StringColumn(this) with PartitionKey
+
+  object id extends TimeUUIDColumn(this) with ClusteringOrder {
+    override lazy val name = "song_id"
+  }
+
   object title extends StringColumn(this)
+
   object album extends StringColumn(this)
 
   override def fromRow(r: Row): Song = Song(id(r), title(r), album(r), artist(r))

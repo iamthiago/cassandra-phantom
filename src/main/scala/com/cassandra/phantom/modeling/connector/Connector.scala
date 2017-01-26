@@ -2,8 +2,8 @@ package com.cassandra.phantom.modeling.connector
 
 import java.net.InetAddress
 
+import com.outworkers.phantom.connectors.{ContactPoint, ContactPoints}
 import com.typesafe.config.ConfigFactory
-import com.websudos.phantom.connectors.{ContactPoint, ContactPoints}
 
 import scala.collection.JavaConversions._
 

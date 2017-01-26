@@ -5,12 +5,12 @@ import com.cassandra.phantom.modeling.database.EmbeddedDatabase
 import com.cassandra.phantom.modeling.entity.Song
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
-import com.websudos.phantom.dsl.ResultSet
+import com.outworkers.phantom.dsl.ResultSet
 import com.websudos.util.testing.{Sample, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
 
 /**
   * Tests Songs methods against an embedded cassandra
@@ -31,7 +31,7 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
     *
     */
   override def beforeAll(): Unit = {
-    Await.result(database.autocreate().future(), 5.seconds)
+    database.create(5.seconds)
   }
 
   implicit object SongGenerator extends Sample[Song] {
@@ -85,7 +85,7 @@ class SongsTest extends CassandraSpec with EmbeddedDatabase with Connector.testC
     whenReady(future) { insert =>
       val songsByArtist = database.songsByArtistsModel.getByArtist("System of a Down")
       whenReady(songsByArtist) { searchResult =>
-        searchResult shouldBe a [List[_]]
+        searchResult shouldBe a[List[_]]
         searchResult should have length 3
         this.drop(sample)
         this.drop(sample2)
