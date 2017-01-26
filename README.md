@@ -1,6 +1,6 @@
 # Phantom DSL Example
 
-[![Build Status](https://travis-ci.org/thiagoandrade6/cassandra-phantom.svg?branch=master)](https://travis-ci.org/thiagoandrade6/cassandra-phantom)
+[![Build Status](https://travis-ci.org/PatrickRoumanoff/cassandra-phantom.svg?branch=master)](https://travis-ci.org/PatrickRoumanoff/cassandra-phantom)
 
 This project will give you the idea on how to design your cassandra tables in scala using the [phantom-dsl](https://github.com/outworkers/phantom). My inspiration is to bring here a more real world example based on this library.
 
@@ -12,7 +12,7 @@ Across the code, you will find the following features:
 
 In the class ```Connector``` you will find two connectors:
 - Connect to a Cassandra Cluster somewhere
-- Connect using an embedded Cassandra(for tests only running through ```sbt test```)
+- Connect using an embedded Cassandra (for tests only running through ```sbt test```)
 
 ### Set Consistency Level
 
