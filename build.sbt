@@ -2,7 +2,8 @@ name := "cassandra-phantom"
 
 version := "1.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
+ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
@@ -22,11 +23,11 @@ resolvers ++= Seq(
 libraryDependencies ++= {
 
   val akkaV = "2.4.4"
-  val phantomV = "1.22.0"
+  val phantomV = "2.0.2"
 
   Seq(
-    "com.websudos"        %%  "phantom-dsl"                 % phantomV,
-    "com.websudos"        %%  "phantom-reactivestreams"     % phantomV,
+    "com.outworkers"      %%  "phantom-dsl"                 % phantomV,
+    "com.outworkers"      %%  "phantom-streams"             % phantomV,
     "com.websudos"        %%  "util-testing"                % "0.13.0"    % "test, provided",
     "org.scalatest"       %%  "scalatest"                   % "2.2.4"     % "test",
     "com.typesafe.akka"   %%  "akka-actor"                  % akkaV,

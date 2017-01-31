@@ -1,6 +1,5 @@
 package com.cassandra.phantom.modeling.test.stream
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream._
 import akka.stream.scaladsl._
@@ -9,7 +8,7 @@ import com.cassandra.phantom.modeling.database.ProductionDatabase
 import com.cassandra.phantom.modeling.entity.Song
 import com.cassandra.phantom.modeling.service.SongsService
 import com.datastax.driver.core.utils.UUIDs
-import com.websudos.phantom.reactivestreams._
+import com.outworkers.phantom.streams._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -30,7 +29,7 @@ object SongsStreaming extends ProductionDatabase with Connector.connector.Connec
 
   def main(args: Array[String]) {
 
-    val truncate = database.autotruncate().future()
+    database.truncate(10.seconds)
 
     val insert = Future.sequence(List(
       SongsService.saveOrUpdate(Song(UUIDs.timeBased(), "Prison Song", "Toxicity", "System of a Down")),
@@ -39,7 +38,6 @@ object SongsStreaming extends ProductionDatabase with Connector.connector.Connec
     ))
 
     val f = for {
-      f1 <- truncate
       f2 <- insert
     } yield f2
 

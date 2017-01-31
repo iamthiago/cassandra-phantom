@@ -12,7 +12,7 @@ Across the code, you will find the following features:
 
 In the class ```Connector``` you will find two connectors:
 - Connect to a Cassandra Cluster somewhere
-- Connect using an embedded Cassandra(for tests only running through ```sbt test```)
+- Connect using an embedded Cassandra (for tests only running through ```sbt test```)
 
 ### Set Consistency Level
 
