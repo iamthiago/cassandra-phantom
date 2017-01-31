@@ -4,7 +4,6 @@ import com.cassandra.phantom.modeling.connector.Connector._
 import com.cassandra.phantom.modeling.model.{ConcreteSongsByArtistModel, ConcreteSongsModel}
 import com.outworkers.phantom.dsl._
 
-
 /**
   * Created by thiago on 4/13/16.
   *

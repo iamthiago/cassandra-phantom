@@ -1,6 +1,6 @@
 # Phantom DSL Example
 
-[![Build Status](https://travis-ci.org/PatrickRoumanoff/cassandra-phantom.svg?branch=master)](https://travis-ci.org/PatrickRoumanoff/cassandra-phantom)
+[![Build Status](https://travis-ci.org/thiagoandrade6/cassandra-phantom.svg?branch=master)](https://travis-ci.org/thiagoandrade6/cassandra-phantom)
 
 This project will give you the idea on how to design your cassandra tables in scala using the [phantom-dsl](https://github.com/outworkers/phantom). My inspiration is to bring here a more real world example based on this library.
 
