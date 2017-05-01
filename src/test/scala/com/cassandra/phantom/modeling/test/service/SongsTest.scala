@@ -6,7 +6,8 @@ import com.cassandra.phantom.modeling.entity.Song
 import com.cassandra.phantom.modeling.test.utils.CassandraSpec
 import com.datastax.driver.core.utils.UUIDs
 import com.outworkers.phantom.dsl.ResultSet
-import com.websudos.util.testing.{Sample, _}
+import com.outworkers.util.testing._
+import com.outworkers.util.samplers.Sample
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
