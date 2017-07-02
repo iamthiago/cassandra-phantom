@@ -19,12 +19,12 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.outworkers"      %%  "phantom-dsl"                 % Versions.phantom,
-  "com.outworkers"      %%  "phantom-streams"             % Versions.phantom,
-  "com.outworkers"      %%  "util-testing"                % Versions.util % Test,
-  "org.scalatest"       %%  "scalatest"                   % Versions.scalatest % Test
+  "com.outworkers"  %%  "phantom-dsl"       % Versions.phantom,
+  "com.outworkers"  %%  "phantom-streams"   % Versions.phantom,
+  "com.outworkers"  %%  "util-testing"      % Versions.util % Test,
+  "org.scalatest"   %%  "scalatest"         % Versions.scalatest % Test
 )
 
 PhantomSbtPlugin.projectSettings
 
-phantomCassandraTimeout := Some(120000)
+phantomCassandraTimeout := Some(60000)
