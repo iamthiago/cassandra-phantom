@@ -12,11 +12,11 @@ Across the code, you will find the following features:
 
 In the class ```Connector``` you will find two connectors:
 - Connect to a Cassandra Cluster somewhere
-- Connect using an embedded Cassandra (for tests only running through ```sbt test```)
+- Connect using an embedded Cassandra (this one is for tests only running through ```sbt test```, checkout the phantom plugin)
 
 ### Set Consistency Level
 
-Phantom-DSL offers to you an easy way to set the consistency level for any query you want to execute. Throught the ```GenericSongsModel``` you will find this piece of code ```.consistencyLevel_=(ConsistencyLevel.ONE)``` where you can change it to whatever you want, accordingly to your needs.
+Phantom-DSL offers to you an easy way to set the consistency level for any query you want to execute. You can set that for each query. You can see an example of it in the following classes: ```SongsModel``` and ```SongsByArtistModel```. You will find this piece of code ```.consistencyLevel_=(ConsistencyLevel.ONE)``` where you can change it to whatever you want, accordingly to your needs.
 
 ### Handle queries for multiple tables
 
@@ -31,10 +31,6 @@ You will find how to insert and delete on both tables
 
 Using ```sbt test``` you can run the tests without having any previously Cassandra instalation up and running.
 
-### Simple streaming example using Akka Streams
-
-Under the test folders, you will find a very simple Streaming example, creating a ```Source``` from a publisher provided by the phantom's reactive-streams module.
-
 ## Resources
 
 - [http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html](http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html)
@@ -43,4 +39,4 @@ Under the test folders, you will find a very simple Streaming example, creating 
 
 ### Thanks
 
-Special thanks to [Flavian](https://github.com/alexflav23) who helped me to find out the best way to use phantom to model our Cassandra tables.
+Special thanks to [Flavian](https://github.com/alexflav23) who have helped me to find out the best way to use phantom to model our Cassandra tables.
