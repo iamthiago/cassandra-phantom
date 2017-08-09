@@ -8,5 +8,3 @@ def websudosPattern = {
 resolvers ++= Seq(
   Resolver.url("Maven ivy Websudos", url(Resolver.DefaultMavenRepositoryRoot))(websudosPattern)
 )
-
-addSbtPlugin("com.websudos" %% "phantom-sbt" % "1.27.0")

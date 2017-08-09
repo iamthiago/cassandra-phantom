@@ -12,7 +12,6 @@ import scala.concurrent.Future
   * This is our Database object that wraps our two existing tables,
   * giving the ability to receive different connectors
   * for example: One for production and other for testing
-  *
   */
 class SongsDatabase(override val connector: CassandraConnection) extends Database[SongsDatabase](connector) {
   object SongsModel extends SongsModel with connector.Connector
@@ -46,12 +45,6 @@ class SongsDatabase(override val connector: CassandraConnection) extends Databas
 }
 
 /**
-  * This is the production database, it connects to a secured cluster with multiple contact points
+  * This is the database, it connects to a cluster with multiple contact points
   */
-object ProductionDb extends SongsDatabase(connector)
-
-/**
-  * Thanks for the Phantom plugin, you can start an embedded cassandra in memory,
-  * in this case we are using it for tests
-  */
-object EmbeddedDb extends SongsDatabase(testConnector)
+object Database extends SongsDatabase(connector)
