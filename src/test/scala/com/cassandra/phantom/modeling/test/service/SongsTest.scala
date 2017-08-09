@@ -1,6 +1,6 @@
 package com.cassandra.phantom.modeling.test.service
 
-import com.cassandra.phantom.modeling.database.EmbeddedDb
+import com.cassandra.phantom.modeling.database.Database
 import com.cassandra.phantom.modeling.entity.Song
 import com.cassandra.phantom.modeling.test.utils.{CassandraSpec, SongsGenerator}
 import com.outworkers.phantom.dsl._
@@ -99,7 +99,7 @@ class SongsTest extends CassandraSpec with SongsGenerator {
     * @param song the song to be inserted
     * @return a [[Future]] of [[ResultSet]]
     */
-  private def store(song: Song): Future[ResultSet] = EmbeddedDb.saveOrUpdate(song)
+  private def store(song: Song): Future[ResultSet] = Database.saveOrUpdate(song)
 
   /**
     * Utility method to delete into both tables
@@ -107,5 +107,5 @@ class SongsTest extends CassandraSpec with SongsGenerator {
     * @param song the song to be deleted
     * @return a [[Future]] of [[ResultSet]]
     */
-  private def drop(song: Song) = EmbeddedDb.delete(song)
+  private def drop(song: Song) = Database.delete(song)
 }

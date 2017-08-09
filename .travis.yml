@@ -1,7 +1,20 @@
+sudo: required
+
 language: scala
+
+services:
+  - docker
+
 scala:
-   - 2.12.2
+  - 2.12.2
+
+before_install:
+  make cassandra/run
+
+after_success:
+  make cassandra/clean
+
 script:
-- sbt clean test
+  - sbt clean test
+
 jdk: oraclejdk8
-sudo: false

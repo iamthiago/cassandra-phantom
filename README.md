@@ -4,15 +4,9 @@
 
 This project will give you the idea on how to design your cassandra tables in scala using the [phantom-dsl](https://github.com/outworkers/phantom). My inspiration is to bring here a more real world example based on this library.
 
-## Features
-
-Across the code, you will find the following features:
-
 ### Connect to a secure Cassandra Cluster
 
-In the class ```Connector``` you will find two connectors:
-- Connect to a Cassandra Cluster somewhere
-- Connect using an embedded Cassandra (this one is for tests only running through ```sbt test```, checkout the phantom plugin)
+In the class ```Connector``` you will find a connector that connects to a Cassandra Cluster
 
 ### Set Consistency Level
 
@@ -25,17 +19,39 @@ This is maybe the main goal of this project, showing to you how to handle multip
 - Songs
 - SongsByArtist
 
-You will find how to insert and delete on both tables
+You will find how to insert and delete on both tables.
 
-### Testing using an embedded Cassandra in memory
+### Requirements
 
-Using ```sbt test``` you can run the tests without having any previously Cassandra instalation up and running.
+This project uses docker in order to get up and running a cassandra instance.
+
+### Testing
+
+We are using the official cassandra docker image to setup a simple host.
+
+For convenience we are using Makefile where you will find the following commands:
+
+    - make cassandra/run
+        This command starts a cassandra instance in your localhost and name it as cassandra-phantom.
+        You can see it using the `docker ps` command.
+        
+    - make cassandra/clean 
+        It removes the existing image from your docker.
+        
+    - make cassandra 
+        Runs both command in sequence.
+
+If you don't know Makefile, please check the links below on the Resources section.
+
+After that you can test using `sbt test`.
 
 ## Resources
 
 - [http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html](http://docs.datastax.com/en/cql/3.1/cql/ddl/dataModelingApproach.html)
 - [https://github.com/outworkers/phantom](https://github.com/outworkers/phantom)
-- [https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e](https://medium.com/@foundev/cassandra-batch-loading-without-the-batch-keyword-40f00e35e23e)
+- [https://store.docker.com/images/cassandra](https://store.docker.com/images/cassandra)
+- [https://github.com/docker-library/cassandra](https://github.com/docker-library/cassandra)
+- [https://en.wikipedia.org/wiki/Makefile](https://en.wikipedia.org/wiki/Makefile)
 
 ### Thanks
 

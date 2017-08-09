@@ -24,7 +24,3 @@ libraryDependencies ++= Seq(
   "com.outworkers"  %%  "util-testing"      % Versions.util % Test,
   "org.scalatest"   %%  "scalatest"         % Versions.scalatest % Test
 )
-
-PhantomSbtPlugin.projectSettings
-
-phantomCassandraTimeout := Some(60000)
