@@ -9,7 +9,7 @@ ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 lazy val Versions = new {
   val phantom = "2.14.5"
   val util = "0.30.1"
-  val scalatest = "3.0.1"
+  val scalatest = "3.0.4"
 }
 
 resolvers ++= Seq(
