@@ -2,12 +2,12 @@ name := "cassandra-phantom"
 
 version := "1.0"
 
-scalaVersion := "2.12.2"
+scalaVersion := "2.12.4"
 
 ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 lazy val Versions = new {
-  val phantom = "2.12.1"
+  val phantom = "2.14.5"
   val util = "0.30.1"
   val scalatest = "3.0.1"
 }
