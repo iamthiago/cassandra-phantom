@@ -24,10 +24,10 @@ class SongsDatabase(override val connector: CassandraConnection) extends Databas
     * @return
     */
   def saveOrUpdate(songs: Song): Future[ResultSet] = {
-    for {
-      _ <- SongsModel.store(songs).future()
-      byArtist <- SongsByArtistsModel.store(songs).future
-    } yield byArtist
+    Batch.logged
+      .add(SongsModel.store(songs))
+      .add(SongsByArtistsModel.store(songs))
+      .future()
   }
 
   /**
@@ -37,10 +37,10 @@ class SongsDatabase(override val connector: CassandraConnection) extends Databas
     * @return
     */
   def delete(song: Song): Future[ResultSet] = {
-    for {
-      _ <- SongsModel.deleteById(song.id)
-      byArtist <- SongsByArtistsModel.deleteByArtistAndId(song.artist, song.id)
-    } yield byArtist
+    Batch.logged
+      .add(SongsModel.delete.where(_.id eqs song.id))
+      .add(SongsByArtistsModel.delete.where(_.artist eqs song.artist).and(_.id eqs song.id))
+      .future()
   }
 }
 
